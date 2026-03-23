@@ -59,8 +59,7 @@ const campaignOfferDeliveryPaymentSuccess = async (
   stripePaymentIntentId: string,
   amount: number,
 ) => {
-  const id = '69880d6acac7ba3f27c85b60';
-  const campaignOffer = await CampaignOffer.findById(id);
+  const campaignOffer = await CampaignOffer.findById(campaignOfferId);
   if (!campaignOffer) {
     errorLogger.error('Campaign offer not found after payment');
 
