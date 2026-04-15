@@ -23,10 +23,10 @@ export const handleShippoWebhook = async (req: Request, res: Response) => {
       const transaction = await shippo.transactions.get(transactionId);
 
       const shippingUpdate = {
-        status: 'PURCHASED',
-        trackingNumber: transaction.trackingNumber,
-        labelUrl: transaction.labelUrl,
-        trackingUrl: transaction.trackingUrlProvider,
+        'shipping.status': 'PURCHASED',
+        'shipping.trackingNumber': transaction.trackingNumber,
+        'shipping.labelUrl': transaction.labelUrl,
+        'shipping.trackingUrl': transaction.trackingUrlProvider,
       };
 
       const models: { model: Model<any>; label: string }[] = [
@@ -37,7 +37,7 @@ export const handleShippoWebhook = async (req: Request, res: Response) => {
       for (const { model, label } of models) {
         const doc = await model.findOneAndUpdate(
           { 'shipping.shippoTransactionId': transactionId },
-          { $set: { shipping: shippingUpdate } },
+          { $set: shippingUpdate },
           { new: true },
         );
 
