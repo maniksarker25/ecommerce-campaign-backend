@@ -61,6 +61,12 @@ const createReview = async (reviewerId: string, payload: any) => {
       'This campaign offer already completed',
     );
   }
+  if (campaignOffer.status == CampaignOfferStatus.expired) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'This offer has expired because the review period has passed.',
+    );
+  }
 
   if (campaignOffer?.shipping?.status !== 'DELIVERED') {
     throw new AppError(httpStatus.BAD_REQUEST, 'Product not delivered yet');

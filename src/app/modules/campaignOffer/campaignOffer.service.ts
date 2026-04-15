@@ -381,21 +381,25 @@ const trackingOfferShipment = async (
 
 cron.schedule('0 */12 * * *', async () => {
   try {
-    console.log('Running cleanup for old delivered campaign offers...');
+    console.log('Running update for old delivered campaign offers...');
 
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - CAMPAIGN_OFFER_DELETE_AFTER_DAYS);
 
-    const result = await CampaignOffer.deleteMany({
-      'shipping.status': 'DELIVERED',
-      updatedAt: { $lte: cutoffDate },
-    });
-
-    console.log(
-      `Deleted ${result.deletedCount} old delivered campaign offers.`,
+    const result = await CampaignOffer.updateMany(
+      {
+        'shipping.status': 'DELIVERED',
+        updatedAt: { $lte: cutoffDate },
+        status: { $ne: CampaignOfferStatus.expired },
+      },
+      {
+        $set: { status: CampaignOfferStatus.expired },
+      },
     );
+
+    console.log(`Updated ${result.modifiedCount} campaign offers to EXPIRED.`);
   } catch (error) {
-    console.error('Error deleting old campaign offers:', error);
+    console.error('Error updating campaign offers:', error);
   }
 });
 const CampaignOfferService = {
