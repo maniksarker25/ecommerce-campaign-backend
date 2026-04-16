@@ -3,7 +3,6 @@ import paypal from '@paypal/checkout-server-sdk';
 import axios, { AxiosError } from 'axios';
 import httpStatus from 'http-status';
 import { JwtPayload } from 'jsonwebtoken';
-import cron from 'node-cron';
 import QueryBuilder from '../../builder/QueryBuilder';
 import config from '../../config';
 import AppError from '../../error/appError';
@@ -22,10 +21,7 @@ import Notification from '../notification/notification.model';
 import ShippingAddress from '../shippingAddress/shippingAddress.model';
 import { Store } from '../store/store.model';
 import { USER_ROLE } from '../user/user.constant';
-import {
-  CAMPAIGN_OFFER_DELETE_AFTER_DAYS,
-  CampaignOfferStatus,
-} from './campaignOffer.constant';
+import { CampaignOfferStatus } from './campaignOffer.constant';
 import { ICampaignOffer } from './campaignOffer.interface';
 import { CampaignOffer } from './campaignOffer.model';
 
@@ -324,7 +320,7 @@ const trackingOfferShipment = async (
 
   const carrier =
     process.env.NODE_ENV === 'development'
-      ? 'shippo' // Shippo test mode
+      ? 'shippo'
       : campaignOffer.shipping.provider.toLowerCase();
 
   const tracking_number =
@@ -348,15 +344,12 @@ const trackingOfferShipment = async (
       },
     );
 
-    // console.log(response.data);
-
     const trackingData = response.data;
 
     return {
       trackingData,
     };
   } catch (error) {
-    // 3️⃣ Axios error handling
     if (axios.isAxiosError(error)) {
       const axiosError = error as AxiosError;
       const status =
@@ -369,7 +362,6 @@ const trackingOfferShipment = async (
       );
     }
 
-    // 4️⃣ Other unexpected errors
     throw new AppError(
       httpStatus.INTERNAL_SERVER_ERROR,
       'Something went wrong while fetching tracking data',
@@ -379,29 +371,30 @@ const trackingOfferShipment = async (
 
 // Crone job ================================================
 
-cron.schedule('0 */12 * * *', async () => {
-  try {
-    console.log('Running update for old delivered campaign offers...');
+// cron.schedule('0 */12 * * *', async () => {
+//   try {
+//     console.log('Running update for old delivered campaign offers...');
 
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - CAMPAIGN_OFFER_DELETE_AFTER_DAYS);
+//     const cutoffDate = new Date();
+//     cutoffDate.setDate(cutoffDate.getDate() - CAMPAIGN_OFFER_DELETE_AFTER_DAYS);
 
-    const result = await CampaignOffer.updateMany(
-      {
-        'shipping.status': 'DELIVERED',
-        updatedAt: { $lte: cutoffDate },
-        status: { $ne: CampaignOfferStatus.expired },
-      },
-      {
-        $set: { status: CampaignOfferStatus.expired },
-      },
-    );
+//     const result = await CampaignOffer.updateMany(
+//       {
+//         'shipping.status': 'DELIVERED',
+//         updatedAt: { $lte: cutoffDate },
+//         status: { $ne: CampaignOfferStatus.expired },
+//       },
+//       {
+//         $set: { status: CampaignOfferStatus.expired },
+//       },
+//     );
 
-    console.log(`Updated ${result.modifiedCount} campaign offers to EXPIRED.`);
-  } catch (error) {
-    console.error('Error updating campaign offers:', error);
-  }
-});
+//     console.log(`Updated ${result.modifiedCount} campaign offers to EXPIRED.`);
+//   } catch (error) {
+//     console.error('Error updating campaign offers:', error);
+//   }
+// });
+
 const CampaignOfferService = {
   acceptCampaignOffer,
   getMyCampaignOfferFromDB,
