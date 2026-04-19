@@ -167,9 +167,7 @@ const getMyOrders = async (
       $or: [{ reviewer: profileId }, { bussiness: profileId }],
       paymentStatus: ENUM_PAYMENT_STATUS.SUCCESS,
     })
-      .select(
-        '-shipping -shippingAddress -paymentStatus -isReferralAmountPaid ',
-      )
+      .select('-shippingAddress -paymentStatus -isReferralAmountPaid ')
       .populate({
         path: 'items.product',
         select: 'name images',
