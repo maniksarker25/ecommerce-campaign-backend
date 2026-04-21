@@ -331,16 +331,24 @@ const getAllCampaignFromDB = async (
   const page = Number(query.page) || 1;
   const limit = Number(query.limit) || 10;
   const skip = (page - 1) * limit;
+  const { status } = query;
   const reviewer = await Reviewer.findById(userId)
     .select('city state country')
     .lean();
   if (!reviewer) throw new AppError(httpStatus.NOT_FOUND, 'Reviewer not found');
+  const matchStage: any = {
+    paymentStatus: ENUM_PAYMENT_STATUS.SUCCESS,
+  };
+  if (status) {
+    matchStage.status = status;
+  } else {
+    matchStage.status = CAMPAIGN_STATUS.ACTIVE;
+  }
   const pipeline: any[] = [
     // 1️⃣ Filter by payment success + location logic
     {
       $match: {
-        status: CAMPAIGN_STATUS.ACTIVE,
-        paymentStatus: ENUM_PAYMENT_STATUS.SUCCESS,
+        ...matchStage,
         $expr: {
           $or: [
             { $eq: ['$isShowEverywhere', true] }, // show everywhere

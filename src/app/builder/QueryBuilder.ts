@@ -28,27 +28,18 @@ class QueryBuilder<T> {
     this.modelQuery = this.modelQuery.find(queryObj as FilterQuery<T>);
     return this;
   }
-  // sort() {
-  //   const sort =
-  //     (this?.query?.sort as string)?.split(',')?.join(' ') || '-createdAt';
-  //   this.modelQuery = this.modelQuery.sort(sort as string);
-  //   return this;
-  // }
 
   sort() {
     const sortField = this.query.sort as string;
 
     if (sortField) {
-      // Check if the sortField starts with '-' (indicating descending order)
       const order = sortField.startsWith('-') ? -1 : 1;
       const fieldName = sortField.replace('-', '');
 
-      // Dynamic sorting based on any field provided in the query
       this.modelQuery = this.modelQuery.sort({
         [fieldName]: order,
       });
     } else {
-      // Default sorting if no valid sort option is provided
       this.modelQuery = this.modelQuery.sort('-createdAt');
     }
 
