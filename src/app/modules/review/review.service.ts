@@ -111,8 +111,9 @@ const createReview = async (reviewerId: string, payload: any) => {
       hlsEntryKey: `${rawFileName}.m3u8`,
     });
   }
-
-  campaignOffer.status = CampaignOfferStatus.completed;
+  if (!payload.video) {
+    campaignOffer.status = CampaignOfferStatus.completed;
+  }
   await campaignOffer.save();
 
   // add money for reviewer
