@@ -5,8 +5,7 @@
 declare namespace Express {
   export interface Request {
     files?: {
-      product_image?: File[]; // Add more fields as needed, e.g. category_image, profile_image
-      // Add other fields you might expect to receive
+      product_image?: File[];
       profile_image?: File[];
       course_banner?: File[];
       banner?: File[];
